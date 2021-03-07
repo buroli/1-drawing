@@ -21,10 +21,9 @@ body {
 .cell {
   display: inline-block;
   background: #fff;
-  border: 1px solid #1f1f1f;
+  border: 1px solid #afabab;
   border-top: none;
   border-left: none;
-  color: #000;
   cursor: pointer;
   transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
@@ -53,7 +52,7 @@ body {
     cursor: pointer;
     border: 1px solid grey;
     margin: 5px;
-    transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+    transition: all .3s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 .color-picker__item.active{

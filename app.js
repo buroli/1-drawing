@@ -3,6 +3,7 @@ const app = () => {
     const initState = () => ({
         maxCell: 100,
         classCell: 'cell',
+        defaultCellColor: '#FFFFFF',
         viewportWidth: () => window.innerWidth,
         viewportHeight: () =>  window.innerHeight,
         cellSize: () => state.viewportWidth() / state.maxCell,
@@ -11,10 +12,11 @@ const app = () => {
         elementCell: [],
         isMousedown: false,
         paletteColor: [],
+        maxPaletteColor: 20, // max different color
         currentColor: '',
         mouseX: 0,
         mouseY: 0,
-        isColorPaletteVisible: false
+        isColorPaletteVisible: false,
     })
     
     let state = initState()
@@ -51,10 +53,30 @@ const app = () => {
         })
     }
 
+    const rgb2hex = (rgb) => {
+        if (  rgb.search("rgb") == -1 ) {
+            return rgb;
+       } else {
+            rgb = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?\)$/);
+            function hex(x) {
+                 return ("0" + parseInt(x).toString(16)).slice(-2);
+            }
+            return "#" + hex(rgb[1]).toUpperCase() + hex(rgb[2]).toUpperCase() + hex(rgb[3].toUpperCase()); 
+       }
+    }
 
     // little helper to show/hide cell
     const toggleStatesCell = (elem) => {
-        return elem.target.style.backgroundColor === state.currentColor ? '#ffffff' : state.currentColor;
+        // cell with default color
+        if(!elem.target.style.backgroundColor){
+            return state.currentColor;
+            // cell with same color
+        } else if(rgb2hex(elem.target.style.backgroundColor) === state.currentColor) {
+            return state.defaultCellColor;
+        } else {
+            // new cell
+            return state.currentColor;
+        }
     }
 
     // bunch of functions to handle event attached 
@@ -67,11 +89,13 @@ const app = () => {
     const handleMouseover = (cell) => {
         const {clientX, clientY} = cell;
         const { style } = cell.target;
+        // add some correction to color palette to avoid that the cursor is out of container when it's open
+        const correction = 5;
         state.mouseX = clientX;
         state.mouseY = clientY;
         // set position of color palette
-        colorPicker.style.top = `${state.mouseY}px`;
-        colorPicker.style.left = `${state.mouseX}px`;
+        colorPicker.style.top = `${state.mouseY - correction}px`;
+        colorPicker.style.left = `${state.mouseX - correction}px`;
         // hide palette if cursor is outside it
         if(!cell?.relatedTarget?.classList?.contains('color-picker')){
             colorPicker.classList.remove('open');
@@ -81,11 +105,6 @@ const app = () => {
         if(state.isMousedown){
             style.backgroundColor = toggleStatesCell(cell);
         }
-    }
-
-    const handleClick = (cell) => {
-        // reset cell
-        cell.target.style.backgroundColor = '#FFFFFF';
     }
 
     // helper to generate random colors
@@ -99,9 +118,7 @@ const app = () => {
     }
 
     const paletteColor = () => {
-        // set max 20 colors
-        const maxColor = 20;
-        for (let index = 0; index < maxColor; index++) {
+        for (let index = 0; index < state.maxPaletteColor; index++) {
             state.paletteColor.push(generateColor());
         } 
     }
@@ -148,7 +165,6 @@ const app = () => {
 
         // attach event to each cell
         document.querySelectorAll('.cell').forEach(cell => {
-            cell.addEventListener('click', handleClick, false)
             cell.addEventListener('mousedown', handleMousedown, false)
             cell.addEventListener('mouseover', handleMouseover, false)
         })
